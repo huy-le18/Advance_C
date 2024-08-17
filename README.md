@@ -1,4 +1,4 @@
-# ADVANCE C/C++ ALGORITHM (HalaAcedamy)
+# ADVANCE C/C++ ALGORITHM (HalaAcademy)
 
 ## BÀI 1: COMPILER VÀ CÁC CHỈ THỊ TIỀN XỬ LÝ
 
