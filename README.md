@@ -51,3 +51,76 @@ Variadic functions (hàm biến số tham số) là các hàm trong C có thể 
 
 ## BÀI 3: CON TRỎ (POINTER)
 
+### 1. Con trỏ
+**Con trỏ** là một biến mà trong đó giá trị của nó là địa chỉ của một biến khác.
+**Cách sử dụng con trỏ:**
+- *Khai báo con trỏ*: `type *pointer_name;`
+- *Gán địa chỉ cho con trỏ*: sử dụng toán tử `&` ví dụ:
+    `int a = 10;`
+    `int *ptr = &a;  // khai báo và gán giá trị địa chỉ biến a cho con trỏ ptr`
+- *Truy cập giá trị thông qua con trỏ*: sử dụng toán tử `*` ví dụ: 
+    `*ptr = 20 // thay đổi giá trị của địa chỉ mà ptr đang trỏ tới = 20`    
+
+Ví dụ: 
+
+    int a = 10;
+    int *ptr = &a;  // khai báo và gán giá trị địa chỉ biến a cho con trỏ ptr
+
+    printf("dia chi cua bien a: %p\n", &a);             // in ra địa chỉ biến a
+    printf("gia tri cua con tro ptr: %p\n", ptr);       // in ra giá trị của ptr
+
+    printf("gia tri cua bien a: %d\n", a);              // in ra giá trị của biến a
+    printf("gia tri tai dia chi ptr tro den: %d\n", *ptr);     // in ra giá trị tại địa chỉ ptr trở đến
+Kết quả in ra Terminal: 
+
+    dia chi cua bien a:      000000048FFFFDD4
+    gia tri cua con tro ptr: 000000048FFFFDD4
+    gia tri cua bien a: 10
+    gia tri tai dia chi ptr tro den: 10
+
+
+### 2. Con trỏ hàm
+**Con trỏ hàm** được dùng để lưu trữ địa chỉ của một hàm. Điều này cho phép gọi hàm thông qua con trỏ, điều này hữu ích trong các trường hợp như truyền hàm làm đối số cho các hàm khác. 
+**Cách sử dụng con trỏ hàm:**
+- *Khai báo con trỏ hàm*: `return_type (*pointer_name)(parameter_types);`
+  ví dụ: `int (*pFunc)(int, int);`
+- Gán địa chỉ hàm cho con trỏ:
+  
+  ví dụ: 
+
+        int add(int a, int b) 
+        {
+            return a + b;
+        }
+        pFunc = add;
+- Gọi hàm thông qua con trỏ:
+    `int result = pFunc(5, 3); // Kết quả là 8`
+
+ví dụ:
+
+    #include <stdio.h>
+    int add(int a, int b)
+    {
+        return a + b;
+    }
+
+    int main()
+    {
+        int (*ptr)(int,int);
+
+        ptr = add;
+        int sum = ptr(3,5);
+        printf("sum = %d\n", sum);     // in ra giá trị tại địa chỉ ptr trở đến
+
+        return 0;
+    }
+
+kết quả:
+ `sum = 8`
+
+### 3. Con trỏ hằng 
+
+### 4. Hằng con trỏ 
+
+
+
