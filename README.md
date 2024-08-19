@@ -269,6 +269,101 @@ Kết quả in ra Terminal:
     gia tri cua bien a: 10
     gia tri tai dia chi ptr tro den: 10
 
+**Con trỏ void**:
++ Là 1 con trỏ có thể trỏ đến bất kì kiểu dữ liệu nào. 
++ Phải thực hiện ép kiểu con trỏ `void` trước khi truy suất giá trị. Do con trỏ `void` không có kiểu dữ liệu cụ thể nên trình biên dịch không biết cần đọc bao nhiêu byte.
+
+
+ví dụ:
+
+    #include "stdio.h"
+
+    int main()
+    {
+        int a = 10;
+        void *p = NULL;                  // khai báo con trỏ NULL
+        p = &a;                          // gán địa chỉ biến a cho p;
+        printf("*p = %d \n", *(int*)p);  // ép thành kiểu int* để truy suất giá trị
+
+        return 0;
+    }
+
+Kết quả:
+
+    *p = 10 
+
+**Hằng con trỏ (Pointer to Constant)**: 
+`Pointer to Constant` là được sử dụng khi thiết kế các hàm cho phép người dùng chỉ đọc chứ không được phép ghi. 
++ Cú pháp: `const type *pointer_name;`  Ví dụ: `const char *str1`
++ Không thể thay đổi giá trị tại địa chỉ mà con trỏ trỏ tới.
++ Có thể thay đổi đại chỉ mà con trỏ trỏ tới.
+Ví dụ: 
+Bài toán sắp xếp sinh viên. 
+Có 1 số các hàm tạo ra chỉ để đọc dữ liệu và xử lí. Ta sử dụng const để ngăn chặn việc thay đổi giá trị. 
+
+        int stringCompare(const char *str1, const char * str2)  // khai báo kiểu const
+        {
+            while (*str1 && (*str1 == *str2))           // đọc giá trị 
+            {
+                str1 ++;
+                str2 ++;
+            }
+            /*đọc giá trị*/
+            return *(const unsigned char*) str1 - *(const unsigned char*) str2;
+        }
+        /*Truyền vào hàm */
+        int compareByName(const void *a, const void *b)
+        {
+            /*Ép về kiểu SinhVien để truy suất giá trị*/
+            SinhVien *sv1 = (SinhVien *)a;
+            SinhVien *sv2 = (SinhVien *)b;
+
+            /*Đọc giá trị*/
+            return stringCompare(sv1 -> ten, sv2 -> ten);
+        }
+        
+        int compareByDiemTrungBinh(const void *a, const void *b)
+        {
+            /*Ép về kiểu SinhVien để truy suất giá trị*/
+            SinhVien *sv1 = (SinhVien *)a;
+            SinhVien *sv2 = (SinhVien *)b;
+
+            /*Đọc giá trị*/
+            if(sv1 -> diemTrungBinh > sv2->diemTrungBinh)
+            {
+                return 1;
+            }
+            return 0;
+        }
+
+**Con trỏ hằng (Constant Pointer)**: 
+`Con trỏ hằng (constant pointer)` là một con trỏ mà giá trị của chính con trỏ đó (tức là địa chỉ mà nó trỏ tới) không thể thay đổi sau khi được khởi tạo. Nói cách khác, một khi đã gán một địa chỉ cụ thể cho con trỏ hằng, thì không thể làm cho nó trỏ tới một địa chỉ khác. Tuy nhiên, vẫn có thể thay đổi giá trị tại địa chỉ mà con trỏ hằng trỏ tới.
++ Cú pháp: `type *const pointer_name;`  Ví dụ: `char *const str1`
+
+Ứng dụng:
+
+Trong lập trình vi điều khiển. Để đảm bảo rằng các con trỏ truy cập các thanh ghi này không bị thay đổi địa chỉ trong quá trình thực thi, con trỏ hằng có thể được sử dụng.
+
+`unsigned int * const PORTA = (unsigned int *)0x40004000;`
+
+Giá trị của con trỏ PORTA được gán = `0x40004000`
+
+Một ví dụ khác về con trỏ hằng:
+
+    #include <stdio.h>
+
+    int main() {
+        int x = 10;
+        int *const ptr = &x;  // Con trỏ hằng trỏ đến x
+
+        *ptr = 20;  // Hợp lệ: thay đổi giá trị của x thông qua con trỏ hằng
+        printf("x = %d\n", x);  // In ra 20
+
+        int y = 30;
+        // ptr = &y;  // Lỗi: không thể thay đổi địa chỉ mà con trỏ hằng trỏ tới
+
+        return 0;
+    }
 
 ### 2. Con trỏ hàm
 **Con trỏ hàm** được dùng để lưu trữ địa chỉ của một hàm. Điều này cho phép gọi hàm thông qua con trỏ, điều này hữu ích trong các trường hợp như truyền hàm làm đối số cho các hàm khác. 
@@ -306,12 +401,67 @@ ví dụ:
         return 0;
     }
 
-kết quả:
+Kết quả:
  `sum = 8`
 
-### 3. Con trỏ hằng 
+Ứng dụng của con trỏ hàm:
+Trong bài toán tổng, hiệu, thương, tích:
 
-### 4. Hằng con trỏ 
+    #include "stdio.h"
+    #include <assert.h>
 
+    void tong(int a, int b)
+    {
+        printf("Tong %d va %d: %d\n", a, b, a + b);
+    }
+
+    void hieu(int a, int b)
+    {
+        printf("Hieu %d va %d: %d\n", a, b, a - b);
+    }
+
+    void tich(int a, int b)
+    {
+        printf("Tich %d va %d: %d\n", a, b, a * b);
+    }
+
+    void thuong(int a, int b)
+    {
+        assert(b != 0);
+        printf("Thuong %d va %d: %d\n", a, b, a / b);
+    }
+
+    /* Viết 1 hàm tính toán chung*/
+    /* Với các tham số truyền vào
+    + void (*ptr) (int, int): Địa chỉ của hàm thực hiện
+    + int a: số hạng thứ nhất
+    + int b: số hạng thứ hai
+     */
+    void tinhToan (void (*ptr) (int, int), int a, int b)
+    {
+        printf("Thuc hien phep toan duoi:\n");
+        /* sử dụng con trỏ hàm để gọi tới các hàm tương ứng */
+        ptr(a,b);
+    }
+
+    int main()
+    {
+        tinhToan(&tong, 4, 5);
+        tinhToan(&hieu, 7, 5);
+        tinhToan(&tich, 4, 5);
+        tinhToan(&thuong, 10, 5);
+        return 0;
+    }
+
+kết quả:
+
+    Thuc hien phep toan duoi:
+    Tong 4 va 5: 9
+    Thuc hien phep toan duoi:
+    Hieu 7 va 5: 2
+    Thuc hien phep toan duoi:
+    Tich 4 va 5: 20
+    Thuc hien phep toan duoi:
+    Thuong 10 va 5: 2
 
 
