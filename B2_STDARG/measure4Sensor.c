@@ -8,75 +8,73 @@ typedef enum{
     LIGHT_SENSOR
 }SensorType;
 
+
+#define HANDLE_DATA(type)\
+    char sensor[] = #type;\
+    int numArgs = va_arg(args, int);\
+    i++;\
+    printf("Information about %s:\n", sensor);\
+    for(i; i <= numArgs; i++)\
+    {\
+        if(i == 1)\
+        {\
+            int sensorId = va_arg(args, int);\
+            printf("ID: %d\n", sensorId);\
+        }\
+        else if(i == 2)\
+        {\
+            float dataSensor = va_arg(args, double);\
+            printf("DATA SENSOR: %.2f\n", dataSensor);\
+        }\
+        else if( i == 3)\
+        {\
+            char* parameter3 = va_arg(args, char*);\
+            printf("parameter 3 Info: %s\n", parameter3);\
+        }\
+        else if(i == 4)\
+        {\
+            char* parameter4 = va_arg(args, char*);\
+            printf("parameter 4 Info: %s\n", parameter4);\
+        }\
+        else if( i == 5)\
+        {\
+            int parameter5 = va_arg(args, int);\
+            printf("parameter 5 Info: %d\n", parameter5);\
+        }\
+    }\
+    printf("\n"); 
+
+
 void processSensorData(SensorType type, ...)
 {
     va_list args;
     va_start(args, type);
+    int i = 0;
+
     switch (type)
     {
         case TEMPERATURE_SENSOR:
         {
-            int numArgs = va_arg(args, int);
-            int sensorId = va_arg(args, int);
-            float temperature = va_arg(args, double);
-
-            
-            printf("Temperature Sensor ID: %d, Reading: %.2f degrees\n", sensorId, temperature);
-            if(numArgs > 2)
-            {
-                // xử lí thêm tham số nếu có 
-                char* additionalInfo = va_arg(args, char*);
-                printf("Additional Info:%s\n", additionalInfo);
-                // int additionalInfo = va_arg(args, int);
-                // printf("Additional Info:%d\n", additionalInfo);
-            }
+            HANDLE_DATA(TEMPERATURE_SENSOR);
             break;
         }
         case PRESSURE_SENSOR: 
         {
-            int numArgs = va_arg(args, int);
-            int sensorId = va_arg(args, int);
-            int pressure = va_arg(args, int);
-            printf("Pressure Sensor ID: %d, Reading: %d Pa\n", sensorId, pressure);
-            if(numArgs > 2)
-            {
-                // Xử lý thêm tham số nếu có
-                char* unit = va_arg(args, char*);
-                printf("Unit: %s\n", unit);
-            }
+            HANDLE_DATA(PRESSURE_SENSOR);
             break;
         }     
 
         case HUMIDITY_SENSOR: 
         {
-            int numArgs = va_arg(args, int);
-            int sensorId = va_arg(args, int);
-            int humidity = va_arg(args, int);
-            printf("Humidity Sensor ID: %d, Reading: %d \n", sensorId, humidity);
-            if(numArgs > 2)
-            {
-                // Xử lý thêm tham số nếu có
-                char* unit = va_arg(args, char*);
-                printf("Unit: %s\n", unit);
-            }
+            HANDLE_DATA(HUMIDITY_SENSOR);
             break;
         }   
 
         case LIGHT_SENSOR: 
         {
-            int numArgs = va_arg(args, int);
-            int sensorId = va_arg(args, int);
-            int light = va_arg(args, int);
-            printf("Light Sensor ID: %d, Reading: %d \n", sensorId, light);
-            if(numArgs > 2)
-            {
-                // Xử lý thêm tham số nếu có
-                char* unit = va_arg(args, char*);
-                printf("Unit: %s\n", unit);
-            }
+            HANDLE_DATA(LIGHT_SENSOR);
             break;
         }   
-
 
         default:
             break;
@@ -88,9 +86,9 @@ void processSensorData(SensorType type, ...)
 
 int main()
 {
-    processSensorData(TEMPERATURE_SENSOR, 3, 1, 36.5, "Room Temperature", 5, 6);
-    processSensorData(PRESSURE_SENSOR, 3, 2, 101325, "home1");    
-    processSensorData(HUMIDITY_SENSOR, 3, 40, 90, "home2"); 
-    processSensorData(LIGHT_SENSOR, 3,23, 90, "home3");
+    processSensorData(TEMPERATURE_SENSOR, 5, 1, 36.5, "Room Temperature", "floor 2", 45);
+    processSensorData(PRESSURE_SENSOR, 3, 2, 101325.0, "home1");    
+    processSensorData(HUMIDITY_SENSOR, 4, 40, 90.0, "home2", "yard"); 
+    processSensorData(LIGHT_SENSOR, 3, 23, 90.0, "home3");
     return 0;
 }
