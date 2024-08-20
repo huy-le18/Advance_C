@@ -464,4 +464,11 @@ kết quả:
     Thuc hien phep toan duoi:
     Thuong 10 va 5: 2
 
+## BÀI 4: Extern - Static - Volatile - Register
+### 1. Extern
+### 2. Static
+### 3. Volatile
+### 4. Register
+
+
 
