@@ -453,7 +453,7 @@ Trong bài toán tổng, hiệu, thương, tích:
         return 0;
     }
 
-kết quả:
+Kết quả:
 
     Thuc hien phep toan duoi:
     Tong 4 va 5: 9
@@ -466,9 +466,219 @@ kết quả:
 
 ## BÀI 4: Extern - Static - Volatile - Register
 ### 1. Extern
+
+Trong ngôn ngữ lập trình C, từ khóa `extern` được sử dụng để khai báo một biến hoặc hàm đã được định nghĩa ở nơi khác, có thể là trong một file khác hoặc ở một vị trí khác trong cùng file. Từ khóa này được dùng để thông báo cho trình biên dịch rằng biến hoặc hàm này tồn tại, nhưng nó sẽ không được định nghĩa tại vị trí này.
+
+Ví dụ:
+
+![anh1](extern2.png) 
+
+Kết quả in ra terminal: 
+
+
+
+Ở file `test.c` ta có 1 biến `count` và 1 hàm void `prinf_count(void)`
+
+Ở file `main.c` không cần #include file mà chỉ cần dùng từ khóa `extern`. Sau đó ta có thể sử dụng chúng.
+
+    Value of count: 10
+    Valua of count: 50
+
 ### 2. Static
-### 3. Volatile
-### 4. Register
+#### Biến static cục bộ
+Thông thường, các biến cục bộ chỉ tồn tại trong thời gian hàm được gọi và sẽ bị hủy sau khi hàm kết thúc. Tuy nhiên, `biến static cục bộ` vẫn tồn tại trong suốt thời gian chương trình chạy.
+**Đặc điểm**:
++ Chỉ khởi tạo 1 lần duy nhất. Lần thứ 2 gọi sẽ không khởi tạo lại.
++ Tồn tại hết vòng đời chương trình.
++ Chỉ có giá trị trong hàm.
+  
+**Ứng dụng**:
++ Khởi tạo các giá trị ban đầu
++ Dùng để lưu giá trị (thời gian,...) giữa 2 lần gọi hàm. Ví dụ hàm `millis()` trong Arduino.  
+
+Ví dụ:
+
+    #include <stdio.h>
+
+    void func() {
+        static int count = 0; // Biến count là static
+        count++;
+        printf("Count = %d\n", count);
+    }
+
+    int main() {
+        func();
+        func();
+        func();
+        return 0;
+    }
+
+Kết quả: 
+
+    Count = 1
+    Count = 2
+    Count = 3
+
+#### Biến static toàn cục và hàm static
+**Biến static toàn cục**
+Khi một biến static được khai báo toàn cục, biến đó chỉ có thể được truy cập trong file mà nó được định nghĩa. Điều này nghĩa là phạm vi truy cập của biến toàn cục static bị giới hạn trong phạm vi của file, giúp ngăn chặn việc truy cập ngoài ý muốn từ các file khác. 
+
+Ví dụ:
+![anh1](static.png) 
+
+Kết quả trên terminal báo chưa khai báo: 
+
+    main.o:main.c:(.rdata$.refptr.count[.refptr.count]+0x0): undefined reference to `count'
+
+Giải thích: 
+Ở file `test.c` ta có khai báo biến `static int count = 10;` 
+Ở file `main.c` ta dùng từ khóa `extern int count` để sử dụng biến này ở file `main.c`
+Kết quả trình biên dịch báo lỗi `undefined reference to 'count'`
+
+**Hàm Static**
+
+Khi một hàm được khai báo với từ khóa `static`, hàm đó chỉ có thể được gọi từ bên trong file mà nó được định nghĩa, tương tự như biến toàn cục static. Điều này giúp hạn chế phạm vi truy cập của hàm, tránh xung đột tên hàm với các file khác.
+
+Ứng dụng:
++ Khi người dùng sử dụng hàm lớn (được xây dựng từ các hàm nhỏ). Ta cần khai báo thêm từ khóa `static` ở các hàm nhỏ để tránh xung đột.  
+
+Ví dụ bài toán tìm nghiệm phương trình bậc 2:
+
+Trong file `solve.c`
+
+    #include <stdio.h>
+    #include <math.h>
+
+    // Hàm static để tính delta
+    static double calculateDelta(double a, double b, double c) {
+        return b * b - 4 * a * c;
+    }
+
+    // Hàm public để tìm nghiệm dựa trên delta
+    void findRoots(double a, double b, double c) {
+        double delta = calculateDelta(a, b, c); // Tính delta
+        double x1, x2;
+
+        if (delta > 0) {
+            x1 = (-b + sqrt(delta)) / (2 * a);
+            x2 = (-b - sqrt(delta)) / (2 * a);
+            printf("Phương trình có hai nghiệm phân biệt: x1 = %.2lf và x2 = %.2lf\n", x1, x2);
+        } else if (delta == 0) {
+            x1 = -b / (2 * a);
+            printf("Phương trình có nghiệm kép: x1 = x2 = %.2lf\n", x1);
+        } else {
+            printf("Phương trình vô nghiệm\n");
+        }
+    }
+
+Trong file `main.c` 
+
+    #include <stdio.h>
+
+    // extern hàm findRoots từ solve.c
+    extern void findRoots(double a, double b, double c);
+
+    int main() {
+        double a, b, c;
+
+        // Nhập hệ số a, b, c từ người dùng
+        printf("Nhập hệ số a (a ≠ 0): ");
+        scanf("%lf", &a);
+        printf("Nhập hệ số b: ");
+        scanf("%lf", &b);
+        printf("Nhập hệ số c: ");
+        scanf("%lf", &c);
+
+        // Gọi hàm findRoots để giải phương trình
+        findRoots(a, b, c);
+
+        return 0;
+    }
 
 
+Giải thích: Trong file `solve.c` hàm `static double calculateDelta(double a, double b, double c)` được khai báo để tính delta sử dụng cho hàm `void findRoots(double a, double b, double c)`.
 
+### 3. Register
+
+`Register` được sử dụng để yêu cầu trình biên dịch lưu trữ một biến cụ thể trong một thanh ghi của CPU thay vì trong bộ nhớ RAM thông thường. Điều này có thể giúp tăng tốc độ truy xuất biến vì thanh ghi của CPU có tốc độ truy cập nhanh hơn nhiều so với bộ nhớ. Biến `Register` chỉ được khai báo cục bộ, không thể khai báo là biến toàn cục. 
+Quá trình hoạt động của ALU: 
+![anh1](ALU2.png) 
+
+Ưu điểm khi dùng `Register`:
++ Tốc độ: nhanh hơn do không mất thời gian truy cập từ RAM về thanh ghi và từ thanh ghi về RAM. 
+
+Nhược điểm khi dùng `Register`:
+
++ Giới hạn thanh ghi: CPU chỉ có một số lượng thanh ghi giới hạn.
+
++ Không thể lấy địa chỉ của biến `Register`: Vì biến `Register` có thể không có địa chỉ cố định trong bộ nhớ nên không thể sử dụng toán tử & để lấy địa chỉ của biến `Register`.
+
+Ví dụ: 
+Kiểm tra tốc độ chương trình khi dùng `Registor`.
+
+Chương trình khi không dùng register:
+
+    #include <stdio.h>
+    #include <time.h>
+
+    int main(int argc, char const *argv[])
+    {
+        unsigned long i;
+        clock_t start, end;
+        start = clock();
+        for( i = 0; i < 99999999; i ++);
+        end = clock();
+        printf("run time without registor: %f\n", (double)(end - start)/1000);
+    }
+
+Kết quả: 
+
+    run time without registor: 0.287000
+
+Chương trình khi dùng register:
+
+    #include <stdio.h>
+    #include <time.h>
+
+    int main(int argc, char const *argv[])
+    {
+        register unsigned long i;
+        clock_t start, end;
+        start = clock();
+        for( i = 0; i < 99999999; i ++);
+        end = clock();
+        printf("run time with registor: %f\n", (double)(end - start)/1000);
+    }
+Kết quả:
+
+    run time with registor: 0.096000
+
+### 4. Volatile
+
+Từ khóa `volatile` được sử dụng để thông báo cho trình biên dịch biết không được tối ưu biến đó.
+Khi nào xử dụng `volatile`:
+**Truy cập vào phần cứng**: Khi làm việc với các thanh ghi phần cứng hoặc các thiết bị ngoại vi, giá trị của biến có thể thay đổi khi phần cứng cập nhật, ngay cả khi không có lệnh nào trong chương trình thay đổi giá trị đó.
+**Biến được chia sẻ giữa các luồng (threads)**: Khi làm việc với lập trình đa luồng, một biến có thể được thay đổi bởi một luồng khác. Từ khóa `volatile` đảm bảo rằng mỗi lần biến được đọc, giá trị mới nhất của nó được truy xuất từ bộ nhớ chứ không phải từ bộ nhớ đệm của một luồng.
+**Xử lý tín hiệu (Signal Handlers)**:Trong các chương trình xử lý tín hiệu, một biến có thể được thay đổi trong một trình xử lý tín hiệu bất kỳ thời điểm nào. Từ khóa volatile giúp đảm bảo rằng các biến này được xử lý chính xác.
+
+Ví dụ:
+
+    #include <stdio.h>
+    #include <stdbool.h>
+
+    // Giả sử đây là một biến điều khiển phần cứng
+    volatile int hardware_status = 0;
+
+    int main() {
+        while (hardware_status == 0) {
+            // Đợi phần cứng thay đổi giá trị của hardware_status
+        }
+        printf("Hardware status đã thay đổi!\n");
+        return 0;
+    }
+
+
+Giải thích:
+
++ Trong ví dụ này, `hardware_status` là một biến có thể thay đổi bởi phần cứng. Nếu không sử dụng `volatile`, trình biên dịch có thể tối ưu hóa vòng lặp while, bằng cách đọc giá trị của `hardware_status` một lần và giả định rằng nó sẽ không thay đổi trong suốt vòng lặp. Điều này dẫn đến một vòng lặp vô hạn vì giá trị không được kiểm tra lại từ bộ nhớ.
++ Khi sử dụng `volatile`, trình biên dịch sẽ không tối ưu hóa việc đọc biến, và sẽ kiểm tra lại giá trị của `hardware_status` trong mỗi vòng lặp.
