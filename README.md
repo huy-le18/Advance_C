@@ -887,3 +887,287 @@ Giải thích:
     
 Macro `TRY` bản chất là 2 lệnh `exception_code = setjmp(buf)` và `if(exception_code == 0)`
 Nếu `b == 0` gọi lệnh `THROW(1)` <=>  `longjmp(buf, 1)`. Chương trình nhảy đến đoạn `setjump` khởi tạo và gán giá trị cho `exception_code` = 1 sau đó thực hiện ngoại lệ. 
+
+
+## BÀI 6: Bitmask
+Trong C, `bitmask` là một kỹ thuật sử dụng toán tử `bitwise` để xử lý và kiểm tra các bit trong một biến. `Bitmask` thường được sử dụng trong các tình huống cần lưu trữ nhiều trạng thái nhị phân trong một số nguyên, giúp tiết kiệm bộ nhớ và tăng hiệu suất. Đây là một khái niệm quan trọng trong lập trình hệ thống và lập trình nhúng.
+Các toán tử trong C:
+**Toán tử `NOT bitwise (~)`**
+  Dùng để thực hiện phép NOT bitwise trên từng bit của một số. Kết quả là bit đảo ngược của số đó.
+
+Ví dụ: 
+
+    #include "stdio.h"
+    void display_binary(unsigned char num)
+    {
+        int i = 0;
+        for(i = 0; i < 8; i++)
+        {
+            printf("%d", (num & (1 << (7 - i)))?1:0);
+        }
+        printf("\n");
+    }
+    int main()
+    {
+        unsigned char number = 13;
+        unsigned char not_number = ~ number;
+        printf("binary of number:");
+        display_binary(number);
+        printf("binary of not number:");
+        display_binary(not_number);
+        return 0;
+    }
+
+Kết quả:
+
+    binary of     number:00001101
+    binary of not number:11110010
+
+**Toán tử `AND bitwise (&)`**
+Dùng để thực hiện phép AND bitwise giữa từng cặp bit của hai số. Kết quả là 1 nếu cả hai bit tương ứng đều là 1, ngược lại là 0.
+
+Ví dụ: 
+
+    int main()
+    {
+        unsigned char numberA = 132;
+        unsigned char numberB = 12;
+        printf("binary of number A:");
+        display_binary(numberA);
+        printf("binary of number B:");
+        display_binary(numberB);
+        printf("binary of A And B :");
+        display_binary(numberA & numberB);
+        return 0;
+    }
+
+Kết quả:
+
+    binary of number A:10000100
+    binary of number B:00001100
+    binary of A And B :00000100
+
+**Toán tử `OR bitwise (|)`**
+Dùng để thực hiện phép OR bitwise giữa từng cặp bit của hai số. Kết quả là 1 nếu có hơn một bit tương ứng là 1.
+
+ví dụ: 
+
+    int main()
+    {
+        unsigned char numberA = 132;
+        unsigned char numberB = 12;
+        printf("binary of number A:");
+        display_binary(numberA);
+        printf("binary of number B:");
+        display_binary(numberB);
+        printf("binary of  A OR B :");
+        display_binary(numberA | numberB);
+        return 0;
+    }
+
+kết quả:
+
+    binary of number A:10000100
+    binary of number B:00001100
+    binary of  A OR B :10001100
+
+**Toán tử `XOR bitwise (^)`**
+Dùng để thực hiện phép XOR bitwise giữa từng cặp bit của hai số. Kết quả là 1 nếu chỉ có một bit tương ứng là 1.
+
+Ví dụ:
+
+    int main()
+    {
+        unsigned char numberA = 132;
+        unsigned char numberB = 12;
+        printf("binary of number A:");
+        display_binary(numberA);
+        printf("binary of number B:");
+        display_binary(numberB);
+        printf("binary of  A OR B :");
+        display_binary(numberA ^ numberB);
+        return 0;
+    }
+
+Kết quả:
+
+    binary of number A:10000100
+    binary of number B:00001100
+    binary of  A OR B :10001000
+
+**Toán tử `Shift left (<<)`**
+Dùng để di chuyển bit sang trái, các bit ở bên phải sẽ được dịch sang trái, và các bit ngoài cùng bên phải sẽ được đặt giá trị 0.
+
+Ví dụ: 
+
+    int main()
+    {
+        unsigned char numberA = 132;
+        printf("binary of number A:");
+        display_binary(numberA);
+        printf("binary of  A after Shift left 2 bit:");
+        display_binary(numberA << 2);
+        return 0;
+    }
+
+Kết quả:
+
+    binary of number A:10000100
+    binary of  A after Shift left 2 bit:00010000
+
+**Toán tử `Shift right (>>)`**
+Dùng để di chuyển bit sang phải, các bit ở bên trái sẽ được dịch sang phải, và các bit ngoài cùng bên trái sẽ được đặt giá trị 0.
+
+Ví dụ:
+
+    int main()
+    {
+        unsigned char numberA = 132;
+        printf("binary of number A:");
+        display_binary(numberA);
+        printf("binary of A after shift right 2 bit:");
+        display_binary(numberA >> 2);
+        return 0;
+    }
+
+Kết quả:
+
+    binary of number A:10000100
+    binary of  A after shift right 2 bit:00100001
+
+**Ứng dụng:**
++ Tối ưu hóa bộ nhớ:
+Toán tử bitwise cho phép lưu trữ và quản lý nhiều cờ trạng thái trong một biến duy nhất. Điều này rất hữu ích trong các hệ thống có tài nguyên hạn chế, như vi điều khiển hoặc các hệ thống nhúng.
+Ví dụ: Lưu trữ trạng thái của 8 đèn LED (bật/tắt) trong một biến char (8 bit).
+
++ Tốc độ xử lý các phép toán nhanh
+  Dịch chuyển bit sang trái hoặc phải (<<, >>) giúp nhanh chóng nhân hoặc chia một số cho 2, rất hữu ích trong các phép tính yêu cầu hiệu suất cao.
+Ví dụ 1: Dịch chuyển một số sang trái 1 vị trí tương đương với việc nhân số đó với 2, và dịch chuyển sang phải tương đương với chia cho 2.
+Ví dụ 2: Kiểm tra xem một số có phải là số lẻ hay không bằng cách kiểm tra bit cuối cùng (n & 1)
+
+Bài tập:
+Viết bài toán cấu hình 1 chiếc xe bao gồm màu sắc, năng lượng và động cơ.
+
+    #include <stdio.h>
+    #include <stdint.h>
+
+    #define COLOR_RED 0	
+    #define COLOR_BLUE 1
+    #define COLOR_BLACK 2
+    #define COLOR_WHITE 3
+
+    #define POWER_100HP 0
+    #define POWER_150HP 1
+    #define POWER_200HP 2
+
+    #define ENGINE_1_5L 0
+    #define ENGINE_2_0L 1
+
+    typedef uint8_t CarColor;
+    typedef uint8_t CarPower;
+    typedef uint8_t CarEngine;
+
+    #define SUNROOF_MASK 1 << 0     // 0001
+    #define PREMIUM_AUDIO_MASK 1 << 1 // 0010
+    #define SPORTS_PACKAGE_MASK 1 << 2 // 0100
+    // Thêm các bit masks khác tùy thuộc vào tùy chọn
+
+    // 0b 0 10 10 10 101
+    typedef struct {
+        uint8_t additionalOptions : 3; // 3 bits cho các tùy chọn bổ sung
+        CarColor color : 2;      // do có giá trị biểu diễn màu lớn nhất (COLOR_WHITE) = 3 (0b11) nên ta chỉ cần 2 bit.
+        CarPower power : 2;      // do có giá trị biểu diễn động cơ lớn nhất (POWER_200HP) = 2 (0b10) nên ta chỉ cần 2 bit.
+        CarEngine engine : 1;    // do có giá trị biểu diễn năng lượng lớn nhất (ENGINE_2_0L) = 1 (0b1) nên ta cần 1 bit.
+        
+    } CarOptions;
+
+    void configureCar(CarOptions *car, CarColor color, CarPower power, CarEngine engine, uint8_t options) {
+        car->color = color;     // do là gán giá trị nên dùng dấu = 
+        car->power = power;     // do là gán giá trị nên dùng dấu = 
+        car->engine = engine;   // do là gán giá trị nên dùng dấu = 
+        car->additionalOptions = options;
+    }
+
+    void setOption(CarOptions *car, uint8_t optionMask) {
+        car->additionalOptions |= optionMask;     // dùng bitwise | để set bit mà ko ảnh hưởng đến các bit khác
+    }
+
+    void unsetOption(CarOptions *car, uint8_t optionMask) {
+        car->additionalOptions &= ~optionMask;    // dùng bitwise &~ để clear bit mà ko ảnh hưởng đến các bit khác
+    }
+
+    void displayCarOptions(const CarOptions car) {
+        const char *colors[] = {"Red", "Blue", "Black", "White"};
+        const char *powers[] = {"100HP", "150HP", "200HP"};
+        const char *engines[] = {"1.5L", "2.0L"};
+
+        printf("Car Configuration: \n");
+        printf("Color: %s\n", colors[car.color]);
+        printf("Power: %s\n", powers[car.power]);
+        printf("Engine: %s\n", engines[car.engine]);
+        printf("Sunroof: %s\n", (car.additionalOptions & SUNROOF_MASK) ? "Yes" : "No");
+        printf("Premium Audio: %s\n", (car.additionalOptions & PREMIUM_AUDIO_MASK) ? "Yes" : "No");
+        printf("Sports Package: %s\n", (car.additionalOptions & SPORTS_PACKAGE_MASK) ? "Yes" : "No");
+    }
+
+    int main() {
+        CarOptions myCar;
+        configureCar(&myCar, COLOR_BLACK, POWER_150HP, ENGINE_2_0L, 0); 
+        
+        setOption(&myCar, SUNROOF_MASK);
+        setOption(&myCar, PREMIUM_AUDIO_MASK);
+        
+        displayCarOptions(myCar);
+
+        unsetOption(&myCar, PREMIUM_AUDIO_MASK); 
+        displayCarOptions(myCar);
+
+        printf("size of my car: %d\n", sizeof(CarOptions));
+
+        return 0;
+    }
+
+Kết quả:
+
+    Car Configuration: 
+    Color: Black
+    Power: 150HP
+    Engine: 2.0L
+    Sunroof: Yes
+    Premium Audio: Yes
+    Sports Package: No
+    Car Configuration:
+    Color: Black
+    Power: 150HP
+    Engine: 2.0L
+    Sunroof: Yes
+    Premium Audio: No
+    Sports Package: No
+    size of my car: 1
+
+Giải thích:
+
+Mặc dù có tới 3 thông số chính và 3 thông số phụ nhưng ta chỉ cần 1 byte = 8 bit để biểu diễn thông số của 1 chiếc xe ô tô. 
+
+Có 4 giá trị màu nên ta chỉ cần 2 bit để biểu diễn (00, 01, 10, 11)
+Có 3 giá trị năng lượng nên ta chỉ cần 2 bit để biểu diễn (00, 01, 10)
+Có 2 giá trị màu nên ta chỉ cần 1 bit để biểu diễn (0,1)
+
+Ngoài ra 3 thông số phụ đều là có và không => có 2 giá trị nên mỗi thông số dùng 1 bit để biểu diễn.
+
+
+    // 0b 0 10 10 10 101
+    typedef struct {
+        uint8_t additionalOptions : 3; // 3 bits cho các tùy chọn bổ sung
+        CarColor color : 2;      // do có giá trị biểu diễn màu lớn nhất (COLOR_WHITE) = 3 (0b11) nên ta chỉ cần 2 bit.
+        CarPower power : 2;      // do có giá trị biểu diễn động cơ lớn nhất (POWER_200HP) = 2 (0b10) nên ta chỉ cần 2 bit.
+        CarEngine engine : 1;    // do có giá trị biểu diễn năng lượng lớn nhất (ENGINE_2_0L) = 1 (0b1) nên ta cần 1 bit.
+        
+    } CarOptions;
+
+
+
+
+
+
+
