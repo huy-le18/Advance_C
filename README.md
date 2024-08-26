@@ -682,3 +682,208 @@ Giải thích:
 
 + Trong ví dụ này, `hardware_status` là một biến có thể thay đổi bởi phần cứng. Nếu không sử dụng `volatile`, trình biên dịch có thể tối ưu hóa vòng lặp while, bằng cách đọc giá trị của `hardware_status` một lần và giả định rằng nó sẽ không thay đổi trong suốt vòng lặp. Điều này dẫn đến một vòng lặp vô hạn vì giá trị không được kiểm tra lại từ bộ nhớ.
 + Khi sử dụng `volatile`, trình biên dịch sẽ không tối ưu hóa việc đọc biến, và sẽ kiểm tra lại giá trị của `hardware_status` trong mỗi vòng lặp.
+
+## BÀI 5: Goto-Setjump
+### 5.1. Goto
+`Goto` là 1 từ khóa trong lập trình C, cho phép chương trình nhảy đến một nhãn(label) đã được đặt trước đó trong cùng 1 hàm. 
+**Cú pháp:**
+
+    goto label_name;
+    // các lệnh khác
+    label_name: 
+    // các lệnh sau khi nhảy đến nhãn
+
+Ví dụ:
+
+Cho 1 chương trình khởi tạo 1 biến `num = 0` nếu số đó nhỏ hơn 10 thì quay lại nhãn `label_begin:`
+để cộng số đó thêm 1 đơn vị. Nếu lớn hơn hoặc bằng 10 thì nhảy đến `label_end` để kết thúc chương trình. 
+
+    #include <stdio.h>
+
+    int main() {
+        int num = 0;
+
+        label_begin:
+        printf("Jumped to label begin.\n");
+        num ++;
+
+        if (num < 10) {
+            printf("num: %d\n", num);
+            // nếu nhỏ hơn thì quay lại label_begin.
+            goto label_begin;
+        }
+        else{
+
+            printf("\n");
+            // nếu lớn hơn hoặc bằng thì nhảy đến label_end.
+            goto label_end;
+        }
+
+        printf(" Phần này không được in ra.\n");
+
+
+        label_end:
+        printf("Jumped to label end.\n");
+
+        return 0;
+    }
+
+
+Kết quả: 
+
+    Jumped to label begin.
+    num: 1
+    Jumped to label begin.
+    num: 2
+    Jumped to label begin.
+    num: 3
+    Jumped to label begin.
+    num: 4
+    Jumped to label begin.
+    num: 5
+    Jumped to label begin.
+    num: 6
+    Jumped to label begin.
+    num: 7
+    Jumped to label begin.
+    num: 8
+    Jumped to label begin.
+    num: 9
+    Jumped to label begin.
+
+    Jumped to label end.
+
+**Ứng dụng của `goto`:**
++ Thoát ra khỏi nhiều vòng lặp lồng nhau.
+Khi cần thoát ra khỏi nhiều vòng lặp lồng nhau ngay lập tức, việc sử dụng goto có thể đơn giản và hiệu quả hơn so với việc sử dụng các cờ (flags) hoặc các biến điều kiện.
+Ví dụ:
+
+        #include <stdio.h>
+
+        int main() {
+            for (int i = 0; i < 10; i++) {
+                for (int j = 0; j < 10; j++) {
+                    if (i * j > 50) {
+                        goto end_loops; // Thoát khỏi tất cả các vòng lặp
+                    }
+                }
+            }
+            end_loops:
+            printf("Exited the loops.\n");
+            return 0;
+        }
+
+Giải thích: Thay vì phải check điều kiện ở 2 vòng lặp để `break` ta dùng lệnh goto để đơn giản và hiệu quả hơn. 
+
++ Xử lý lỗi (Error Handling)
+Trong một số trường hợp, đặc biệt khi có nhiều bước xử lý tuần tự và có khả năng phát sinh lỗi, `goto` có thể được sử dụng để nhảy đến một đoạn mã chung để giải phóng tài nguyên hoặc thực hiện xử lý lỗi.
+
+Ví dụ: 
+
+    #include <stdio.h>
+    #include <stdlib.h>
+
+    int main() {
+        FILE *file = fopen("example.txt", "r");
+        if (file == NULL) {
+            goto error;
+        }
+
+        // Các bước xử lý với file
+        // ...
+
+        fclose(file);
+        return 0;
+
+        error:
+        printf("Error occurred, cleaning up.\n");
+        // Các bước dọn dẹp nếu cần
+        return 1;
+    }
+Giải thích: Trong trường hợp xảy ra lỗi khi mở file. Chương trình sẽ nhảy luôn đến nhãn `error` để thực hiện xử lý lỗi. 
+### 5.2. Setjmp
+`setjmp.h` là một thư viện trong ngôn ngữ lập trình C, cung cấp hai hàm chính là `setjmp` và `longjmp`được sử dụng để thực hiện xử lý ngoại lệ trong C.
++ `setjmp` là một macro trong C được định nghĩa trong thư viện `setjmp.h`. Nó lưu trạng thái hiện tại của luồng điều khiển tại điểm mà nó được gọi, bao gồm thông tin về con trỏ chương trình, con trỏ ngăn xếp và các thanh ghi CPU khác.
++ `longjmp` thường được dùng để quay trở lại điểm mà `setjmp` đã lưu trạng thái.
+
+**Cú pháp setjmp:**
+`int setjmp(jmp_buf env);`
+
+`env`: Là một biến kiểu `jmp_buf`, được sử dụng để lưu trữ thông tin trạng thái tại thời điểm `setjmp` được gọi.
+Nếu `setjmp` được gọi lần đầu tiên, nó sẽ trả về giá trị 0.
+Nếu quay trở lại `setjmp` thông qua `longjmp`, nó sẽ trả về một giá trị khác 0 (thường là giá trị mà `longjmp` đã truyền vào).
+Ví dụ:
+
+    #include <stdio.h>
+    #include <setjmp.h>
+    jmp_buf buf;
+
+    int main() {
+
+        int setPoint = setjmp(buf);
+            // No exception
+        if (setPoint == 0) {
+            printf("No exception \n");
+            longjmp(buf, 1);
+        } else if(setPoint == 1){
+            // process exception 1
+            printf("process exception 1.\n");
+            longjmp(buf, 4);
+        } else if(setPoint == 4)
+        {
+            // process exception 4
+            printf("process exception 4.\n");
+        }
+        return 0;
+    }
+
+Giải thích:
++ `int setPoint = setjmp(buf);`: được gọi lần đầu tiên nên `setPoint` = 0, đồng thời sẽ lưu con trỏ chương trình, con trỏ ngăn xếp và các thanh ghi CPU khác vào `buf`.
++ `longjmp(buf, 1);`: Truyền giá trị vào `buf`, đồng thời quay trở lại điểm mà hàm `setjmp(buf)` được gọi là dòng `int setPoint = setjmp(buf);` => `setPoint = 1`
+
+Ứng dụng của `setjmp-longjmp`
++ Xây dựng thư viện để xử lý ngoại lệ **(TRY, CATCH, THROW)** trên các ngôn ngữ bậc cao như Python, Javascript,...
++ 
+Ví dụ:
+
+    #include <stdio.h>
+    #include <setjmp.h>
+
+    jmp_buf buf;
+    int exception_code;
+
+    #define TRY if ((exception_code = setjmp(buf)) == 0) 
+    #define CATCH(x) else if (exception_code == (x)) 
+    #define THROW(x) longjmp(buf, (x))
+
+
+    double divide(int a, int b) {
+        if (b == 0) {
+            THROW(1); // Mã lỗi 1 cho lỗi chia cho 0
+        }
+        return (double)a / b;
+    }
+
+    int main() {
+        int a = 10;
+        int b = 0;
+        double result = 0.0;
+
+        TRY {
+            result = divide(a, b);
+            printf("Result: %f\n", result);
+        } CATCH(1) {
+            printf("Error: Divide by 0!\n");
+        }
+        // Các xử lý khác của chương trình
+        return 0;
+    }
+
+Giải thích: 
+
+    #define TRY if ((exception_code = setjmp(buf)) == 0) 
+    #define CATCH(x) else if (exception_code == (x)) 
+    #define THROW(x) longjmp(buf, (x))
+    
+Macro `TRY` bản chất là 2 lệnh `exception_code = setjmp(buf)` và `if(exception_code == 0)`
+Nếu `b == 0` gọi lệnh `THROW(1)` <=>  `longjmp(buf, 1)`. Chương trình nhảy đến đoạn `setjump` khởi tạo và gán giá trị cho `exception_code` = 1 sau đó thực hiện ngoại lệ. 
