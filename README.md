@@ -1166,8 +1166,194 @@ Ngoài ra 3 thông số phụ đều là có và không => có 2 giá trị nên
     } CarOptions;
 
 
+## BÀI 7: Struct-Union 
+### 7.1. Struct
+Trong ngôn ngữ lập trình C, `Struct` là một cấu trúc dữ liệu cho phép lập trình viên tự định nghĩa một kiểu dữ liệu mới bằng cách nhóm các biến có các kiểu dữ liệu khác nhau lại với nhau. `Struct` cho phép tạo ra một thực thể dữ liệu lớn hơn và có tổ chức hơn từ các thành viên (members) của nó.
+
+**Cú pháp**
+
+    struct TenStruct {
+        kieuDuLieu1 thanhVien1;
+        kieuDuLieu2 thanhVien2;
+        // ...
+    };
 
 
+Ví dụ: Định nghĩa 1 cấu trúc tên là Student 
 
 
+    #include <stdio.h>
+    #include <string.h>
 
+    // Định nghĩa một cấu trúc tên là Student
+    struct Student {
+        char name[50];
+        int age;
+        float gpa;
+    };
+
+    int main() {
+        // Khai báo biến kiểu Student
+        struct Student student1;
+
+        // Gán giá trị cho các thành phần của struct
+        student1.age = 23;
+        student1.gpa = 3.5;
+        
+        // Gán chuỗi vào mảng ký tự
+        strcpy(student1.name, "Le Danh Huy");
+
+        // In ra thông tin của sinh viên
+        printf("Name: %s\n", student1.name);
+        printf("Age: %d\n", student1.age);
+        printf("GPA: %.2f\n", student1.gpa);
+
+        return 0;
+    }
+
+Kết quả:
+
+    Name: Le Danh Huy
+    Age: 23
+    GPA: 3.50
+
+**Kích thước của struct:**
++ Kích thước của `struct` là tổng kích thước của các thành phần cộng với bất kỳ khoảng trống (padding) nào được thêm vào để căn chỉnh dữ liệu.
++ Là bội của kích thước kiểu dữ liệu lớn nhất. 
+
+Ví dụ minh họa:
+
+Nếu không chèn padding thì kích thước `struct` là 13 bytes
+
+    #include <stdio.h>
+
+    struct Example {
+        char c;    // 1 byte + 3 bytes padding
+        int i;     // 4 bytes
+        double d;  // 8 bytes
+    };
+
+    int main() {
+        printf("Size of struct Example: %zu bytes\n", sizeof(struct Example));
+        return 0;
+    }
+
+Kết quả:
+
+    Size of struct Example: 16 bytes
+Hình ảnh minh họa về việc chèn padding
+
+![anh1](struct2.png) 
+
+**Ứng dụng của struct:**
++ Giúp tổ chức dữ liệu liên quan với nhau thành một khối duy nhất.
+
++ Dễ dàng quản lý và truy cập các dữ liệu liên quan trong một cấu trúc.
+
++ Tăng tính rõ ràng và dễ đọc của mã nguồn.
+
+
+### 7.2. Union
+`Union` là một kiểu dữ liệu đặc biệt tương tự như `Struct`, nhưng các thành phần của `union` đều chia sẻ cùng một vùng nhớ. Điều này có nghĩa là `union` chỉ có thể lưu trữ một giá trị tại một thời điểm cho bất kỳ thành phần nào của nó.
+
+**Cú pháp:**
+
+    union TenUnion {
+        kieuDuLieu1 thanhVien1;
+        kieuDuLieu2 thanhVien2;
+        // ...
+    };
+
+Ví dụ:
+
+    #include <stdio.h>
+    #include <stdint.h>
+
+    typedef union Data
+    {
+        uint8_t a;
+        uint16_t b;
+        uint32_t c;
+    }Data;
+
+
+    int main()
+    {
+        Data data;
+        printf("Size of data: %d\n", sizeof(data));
+
+        printf("Address of data.a: %p\n", &data.a);
+        printf("Address of data.a: %p\n", &data.b);
+        printf("Address of data.a: %p\n", &data.c);
+
+    }
+
+kết quả:
+
+    Size of data: 4
+    Address of data.a: 00000059C23FF96C
+    Address of data.a: 00000059C23FF96C
+    Address of data.a: 00000059C23FF96C
+
+Hình ảnh giải thích về việc dùng chung vùng nhớ.
+
+![anh1](union4.png) 
+
+**Kích thước Union:**
++ Kích thước của Union là kích thước của thành phần lớn nhất trong các thành phần
++ Khi giá trị của 1 thành viên thay đổi thì giá trị của các thành phần khác cũng thay đổi do dùng chung vùng nhớ.
+
+
+**Ứng dụng:** 
+
++ Tiết kiệm bộ nhớ: Rất hữu ích trong các ứng dụng nhúng hoặc hệ thống tài nguyên hạn chế.
+
++ Tính linh hoạt: Cho phép lưu trữ nhiều loại dữ liệu khác nhau, nhưng chỉ cần một trong số đó tại một thời điểm.
+
+
+### 7.3. Ứng dụng kết hợp struct và union
+
+Bài toán: giả sử ta truyền data từ MCU A qua MCU B với frame truyền (ID, data, checksum)
+
+![anh1](struct_union.png) 
+
+**Frame truyền:**
+
+![anh1](struct_data.png) 
+
+**Code:**
+
+    #include <stdio.h>
+    #include <stdint.h>
+    #include <string.h>
+
+    typedef union {
+        struct {
+            uint8_t id[2];
+            uint8_t data[4];
+            uint8_t check_sum[2];
+        } data;
+
+        uint8_t frame[8];
+
+    } Data_Frame;
+
+    int main(int argc, char const *argv[])
+    {
+        Data_Frame transmitter_data;
+        
+        strcpy(transmitter_data.data.id, "10");
+        strcpy(transmitter_data.data.data, "1234");
+        strcpy(transmitter_data.data.check_sum, "70");
+
+        Data_Frame receiver_data;
+        strcpy(receiver_data.frame, transmitter_data.frame);
+
+        return 0;
+    }
+
+**Giải thích:**
+
+Thay vì truyền lần lượt 2 byte ID, 4 byte data, 2 byte check sum của struct data. thì ta chỉ cần dùng thông qua 8 byte của mảng frame. Do frame[8] và data là thành viên của union nên chúng có chung vùng nhớ. 
+
+![anh1](union_data.png) 
