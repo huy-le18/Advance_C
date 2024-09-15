@@ -1357,3 +1357,204 @@ Bài toán: giả sử ta truyền data từ MCU A qua MCU B với frame truyề
 Thay vì truyền lần lượt 2 byte ID, 4 byte data, 2 byte check sum của struct data. thì ta chỉ cần dùng thông qua 8 byte của mảng frame. Do frame[8] và data là thành viên của union nên chúng có chung vùng nhớ. 
 
 ![anh1](union_data.png) 
+
+## BÀI 7: Memory layout.
+
+Chương trình main.exe (trên windown), main.hex (nạp vào vi điều khiển) được lưu ở bộ nhớ SSD hoặc FLASH. Khi nhấn run chương trình trên window (cấp nguồn cho vi điều khiển) thì những chương trình này sẽ được copy vào bộ nhớ RAM để thực thi. 
+![alt text](image.png)
+
+### Phần text segment:
+- Mã máy: Chứa tập hợp các lệnh thực thi.
+- Quyền truy cập: Text Segment thường có quyền đọc và thực thi, nhưng không có quyền ghi. 
+- Lưu hằng số (const), con trỏ kiểu char.
+- Tất cả các biến lưu ở phân vùng Text đều không thể thay đổi giá trị mà chỉ được đọc. 
+
+### Data segment 
+- Chứa các biến toàn cục được khởi tạo với giá trị khác 0
+- Chứa các biến được khởi tạo với giá trị khác 0.
+- Quyền truy cập là đọc và ghi, tức là có thể đọc và thay đổi giá trị của biến.
+- Tất cả các biến sẽ được thu hồi sau khi chương trình kết thúc. 
+  
+### BSS Segment
++ Chứa các biến toàn cục khởi tạo với giá trị bằng 0 hoặc không gán giá trị.
++ Chứa các biến static với giá trị khởi tạo bằng 0 hoặc không gán giá trị.
++ Có thể đọc và ghi, tức là có thể đọc và thay đổi giá trị của biến.
++ Tất cả các biến sẽ được thu hồi sau khi chương trình kết thúc. 
+
+### Stack
++ Chứa các biến cục bộ, tham số truyền vào.
++ Quyền truy cập: đọc và ghi, nghĩa là có thể đọc và thay đổi giá trị của biến trong suốt thời gian chương trình chạy.
++ Sau khi ra khỏi hàm, sẽ thu hồi vùng nhớ.
++ LIFO (Last In, Fisrt Out)
+
+
+### Heap
+Cấp phát động:
++ Heap được sử dụng để cấp phát bộ nhớ động trong quá trình thực thi của chương trình.
++ Điều này cho phép chương trình tạo ra và giải phóng bộ nhớ theo nhu cầu, thích ứng với sự biến đổi của dữ liệu trong quá trình chạy.
++ Các hàm như `malloc()`, `calloc()`, `realloc()` và `free()` được sử dụng để cấp phát và giải phóng bộ nhớ trên heap. 
++ Quyền truy cập: có quyền đọc và ghi, nghĩa là có thể đọc và thay đổi giá trị của biến trong suốt thời gian chương trình chạy.
+
+**Hàm `malloc()`: Cấp phát kích thước vùng nhớ cho con trỏ ptr;**
+
+    void* malloc(size_t size);
++ size: Kích thước (tính bằng byte) của vùng nhớ cần cấp phát.
++ Trả về: Con trỏ đến vùng nhớ vừa được cấp phát. Nếu cấp phát thất bại (không đủ bộ nhớ), hàm trả về NULL.
+
+
+Ví dụ:
+
+    int *arr = (int *)malloc(5 * sizeof(int));
+    if (arr == NULL) {
+        // Xử lý lỗi khi không đủ bộ nhớ
+    }
+
+**Hàm `calloc()`: Cấp phát và khởi tạo vùng nhớ về 0.**
+
+    int *arr = (int *)calloc(n, sizeof(int));
+
++ nitems: Số lượng phần tử cần cấp phát.
++ size: Kích thước của mỗi phần tử (tính theo byte).
+
+Ví dụ:
+
+    int *arr = (int *)calloc(5, sizeof(int)); // Cấp phát bộ nhớ cho 5 số nguyên và khởi tạo về 0
+    if (arr == NULL) {
+        printf("Không đủ bộ nhớ để cấp phát.\n");
+    }
+
+**Hàm `realloc()`: thay đổi kích thước cấp phát.**
+
+    void* realloc(void *ptr, size_t new_size);
+
++ ptr: Con trỏ tới vùng nhớ đã được cấp phát trước đó.
++ new_size: Kích thước mới (tính theo byte) cần thay đổi.
+
+
+
+        int *arr = (int *)malloc(5 * sizeof(int)); // Cấp phát bộ nhớ cho 5 số nguyên
+        if (arr == NULL) {
+            printf("Không đủ bộ nhớ để cấp phát.\n");
+            return 1;
+        }
+        // Tăng kích thước của mảng lên 10 số nguyên
+        arr = (int *)realloc(arr, 10 * sizeof(int));
+        if (arr == NULL) {
+            printf("Không đủ bộ nhớ để cấp phát lại.\n");
+        }
+
+
+**Hàm `free`Thu hồi vùng nhớ.**
+
+    void free(void *ptr);
+    
++ ptr: Con trỏ trỏ đến vùng nhớ đã được cấp phát trước đó. Nếu con trỏ này là NULL, hàm free sẽ không làm gì.
+
+ví dụ:
+
+    free(ptr);
+
+**Sự khác nhau giữa `malloc()` và `calloc()`:**
+
++ `calloc(nitems, size)`: Cấp phát và khởi tạo vùng nhớ về 0.
+  
++ `malloc(size)`: Chỉ cấp phát vùng nhớ mà không khởi tạo giá trị. Nội dung của vùng nhớ này có thể là bất kỳ giá trị nào còn sót lại từ trước (garbage value).
+
+
+**Sự khác nhau giữa `Stack` và `Heap`:**
+
+`Stack`: vùng nhớ Stack được quản lý bởi hệ điều hành, dữ liệu được lưu trong Stack sẽ tự động giải phóng khi hàm thực hiện xong công việc của mình.
+
+`Heap`: Vùng nhớ Heap được quản lý bởi lập trình viên (trong C hoặc C++), dữ liệu trong Heap sẽ không bị hủy khi hàm thực hiện xong, điều đó có nghĩa bạn phải tự tay giải phóng vùng nhớ bằng câu lệnh free (trong C), và delete hoặc delete [] (trong C++), nếu không sẽ xảy ra hiện tượng rò rỉ bộ nhớ
+
+`Stack`: Bộ nhớ Stack được dùng để lưu trữ các biến cục bộ trong hàm, tham số truyền vào... Truy cập vào bộ nhớ này rất nhanh và được thực thi khi chương trình được biên dịch.
+
+`Heap`: Bộ nhớ Heap được dùng để lưu trữ vùng nhớ cho những biến được cấp phát động bởi các hàm malloc - calloc - realloc (trong C).
+
+## BÀI 7: Linked List.
+
+**Linked list** là một cấu trúc dữ liệu trong lập trình máy tính, được sử dụng để tổ chức và lưu trữ dữ liệu. Một linked list bao gồm một chuỗi các "nút" (nodes), mỗi nút chứa một giá trị dữ liệu và một con trỏ (pointer) đến nút tiếp theo trong chuỗi.
+
+Có hai loại linked list chính:
+- **Singly Linked List** (Danh sách liên kết đơn): Mỗi nút chỉ chứa một con trỏ đến nút tiếp theo trong chuỗi.
+![alt text](image-1.png)
+
+- **Doubly Linked List** (Danh sách liên kết đôi): Mỗi nút chứa hai con trỏ, một trỏ đến nút tiếp theo và một trỏ đến nút trước đó.
+![alt text](image-2.png)
+
+**Linked List** cung cấp linh hoạt để thêm, xóa và chèn các phần tử mà không cần phải di chuyển toàn bộ dãy số như mảng. Tuy nhiên nó cũng có 1 số nhược điểm, như việc cần thêm 1 con trỏ cho mỗi nút làm tăng kích thước bộ nhớ và có thể dẫn đến hiệu suất kém hơn trong 1 số trường hợp mảng. 
+
+Dưới đây là định nghĩa 1 node trong **Singly Linked List**
+
+    typedef struct node
+    {
+        int value;
+        struct node* pNext;
+    }node;
+
+**Một số thao tác trong list.**
+***Khởi tạo 1 node*** 
+
+    node *createNode(int value)
+    {
+        node *ptr = (node*)malloc(sizeof(node));
+        ptr->value = value;
+        ptr->next = NULL;
+        return ptr;
+    }
+
+***Chèn 1 node vào cuối list*** 
+
+    void push_back(node** array, int value)
+    {
+        node* newNode = NULL;
+        node* temp = *array;  
+
+        newNode = createNode(value); 
+
+        if (*array == NULL)  
+        {
+            *array = newNode;
+        }
+        else               
+        {
+            while (temp->pNext != NULL) 
+            {
+                temp = temp -> pNext;    
+            }
+            temp->pNext = newNode;    
+        }
+    }
+
+***Xóa 1 node ở cuối list*** 
+
+    void pop_back(node** array)
+    {
+        node *pTemp = *array;
+        node *pDelete = NULL;
+
+        if (pTemp == NULL)
+        {
+            printf("No element in list!!!\n");
+        }
+        else if(pTemp -> pNext == NULL)
+        {
+            pDelete = (*array);
+            (*array) = NULL;
+        }
+        else if (pTemp -> pNext -> pNext != NULL)
+        {
+            while (pTemp -> pNext -> pNext != NULL)  
+            {
+                pTemp = pTemp -> pNext;
+            }
+            pDelete = pTemp -> pNext;
+            pTemp ->pNext = NULL;
+        }
+
+        free(pDelete);
+    }
+
+
+
+
