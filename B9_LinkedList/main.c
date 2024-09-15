@@ -2,31 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 
-
-// node *createNode(int value); 
-
-// void push_back(node** array, int value); 
-// void push_front(node **array, int value); // them 1 node vao phia truoc
-// void pop_back(node **array); 
-// void pop_front(node **array); // xoa node dau tien
-
-// void insert(node **array, int value, int pos); // them 1 node vao mot vi tri bat ky
-// void delete_list(node **array, int pos); // xoa 1 node tai mot vi tri bat ky
-
-// int front(node *array); // lay gia tri cua node dau tien
-// int back(node *array); // lay gia tri cua node cuoi cung
-// int size(node *array); // lay kich thuoc cua list
-// int get(node *array, int pos); 
-// bool empty(node *array); // kiem tra list co rong hay khong
-
-
 typedef struct node
 {
     int value;
     struct node* pNext;
 }node;
-
-
 
 node* createNode(int value)
 {
@@ -274,7 +254,7 @@ int main()
 
     push_front(&list, 5); /* 5, 3, 2, 7*/
 
-//   pop_front(&list);
+    pop_front(&list);
     insert(&list, 12, 2); /* 5, 3, 12, 2, 7*/
 
     delete_list(&list, 0); /*3, 12, 2, 7*/
