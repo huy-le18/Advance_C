@@ -1471,20 +1471,20 @@ ví dụ:
 
 `Heap`: Bộ nhớ Heap được dùng để lưu trữ vùng nhớ cho những biến được cấp phát động bởi các hàm malloc - calloc - realloc (trong C).
 
-## BÀI 7: Linked List.
+## BÀI 8: Linked List.
 
-**Linked list** là một cấu trúc dữ liệu trong lập trình máy tính, được sử dụng để tổ chức và lưu trữ dữ liệu. Một linked list bao gồm một chuỗi các "nút" (nodes), mỗi nút chứa một giá trị dữ liệu và một con trỏ (pointer) đến nút tiếp theo trong chuỗi.
+`Linked list` là một cấu trúc dữ liệu trong lập trình máy tính, được sử dụng để tổ chức và lưu trữ dữ liệu. Một linked list bao gồm một chuỗi các "nút" (nodes), mỗi nút chứa một giá trị dữ liệu và một con trỏ (pointer) đến nút tiếp theo trong chuỗi.
 
 Có hai loại linked list chính:
-- **Singly Linked List** (Danh sách liên kết đơn): Mỗi nút chỉ chứa một con trỏ đến nút tiếp theo trong chuỗi.
+- `Singly Linked List` (Danh sách liên kết đơn): Mỗi nút chỉ chứa một con trỏ đến nút tiếp theo trong chuỗi.
 ![alt text](image-1.png)
 
-- **Doubly Linked List** (Danh sách liên kết đôi): Mỗi nút chứa hai con trỏ, một trỏ đến nút tiếp theo và một trỏ đến nút trước đó.
+- `Doubly Linked List` (Danh sách liên kết đôi): Mỗi nút chứa hai con trỏ, một trỏ đến nút tiếp theo và một trỏ đến nút trước đó.
 ![alt text](image-2.png)
 
-**Linked List** cung cấp linh hoạt để thêm, xóa và chèn các phần tử mà không cần phải di chuyển toàn bộ dãy số như mảng. Tuy nhiên nó cũng có 1 số nhược điểm, như việc cần thêm 1 con trỏ cho mỗi nút làm tăng kích thước bộ nhớ và có thể dẫn đến hiệu suất kém hơn trong 1 số trường hợp mảng. 
+`Linked List` cung cấp linh hoạt để thêm, xóa và chèn các phần tử mà không cần phải di chuyển toàn bộ dãy số như mảng. Tuy nhiên nó cũng có 1 số nhược điểm, như việc cần thêm 1 con trỏ cho mỗi nút làm tăng kích thước bộ nhớ và có thể dẫn đến hiệu suất kém hơn trong 1 số trường hợp mảng. 
 
-Dưới đây là định nghĩa 1 node trong **Singly Linked List**
+Dưới đây là định nghĩa 1 node trong `Singly Linked List`
 
     typedef struct node
     {
@@ -1554,6 +1554,168 @@ Dưới đây là định nghĩa 1 node trong **Singly Linked List**
 
         free(pDelete);
     }
+
+## BÀI 9: Stack_Queue
+
+### Stack
+
+`Stack` (ngăn xếp) là một cấu trúc dữ liệu tuân theo nguyên tắc "Last In, First Out" (LIFO), nghĩa là phần tử cuối cùng được thêm vào stack sẽ là phần tử đầu tiên được lấy ra. 
+
+Các thao tác cơ bản trên stack bao gồm:
+
++ `push` (đẩy) để thêm một phần tử vào đỉnh của `stack`.
++ `pop` để xóa một phần tử ở đỉnh `stack`.
++ `top` để lấy giá trị của phần tử ở đỉnh `stack`. 
+
+Dưới đây là định nghĩa 1 Stack:
+
+    typedef struct Stack {
+        int* items;
+        int size;
+        int top;
+    } Stack;
+
+
+**Một số thao tác của Stack.**
+
+***Khởi tạo 1 Stack*** 
+
+    void initialize( Stack *stack, int size) {
+        stack->items = (int*) malloc(sizeof(int) * size);
+        stack->size = size;
+        stack->top = -1;
+    }
+
+***Hàm check trạng thái của Stack***
+
+    int is_empty( Stack stack) {
+        return stack.top == -1;
+    }
+
+    int is_full( Stack stack) {
+        return stack.top == stack.size - 1;
+    }
+
+***Hàm thêm phần tử vào Stack***
+
+    void push( Stack *stack, int value) {
+        if (!is_full(*stack)) {
+            stack->items[++stack->top] = value;
+        } else {
+            printf("Stack overflow\n");
+        }
+    }
+
+***Hàm lấy phần tử ra ngoài Stack***
+
+    int pop( Stack *stack) {
+        if (!is_empty(*stack)) {
+            return stack->items[stack->top--];
+        } else {
+            printf("Stack underflow\n");
+            return -1;
+        }
+    }
+
+***Hàm lấy giá trị đầu Stack***
+
+    int top( Stack stack) {
+        if (!is_empty(stack)) {
+            return stack.items[stack.top];
+        } else {
+            printf("Stack is empty\n");
+            return -1;
+        }
+    }
+
+### Queue
+
+`Queue` là một cấu trúc dữ liệu tuân theo nguyên tắc "First In, First Out" (FIFO), nghĩa là phần tử đầu tiên được thêm vào hàng đợi sẽ là phần tử đầu tiên được lấy ra. 
+Các thao tác cơ bản trên hàng đợi bao gồm:
++ `enqueue` (thêm phần tử vào cuối hàng đợi)
++ `dequeue` (lấy phần tử từ đầu hàng đợi). 
++ `front` để lấy giá trị của phần tử đứng đầu hàng đợi.
+
+Dưới đây là định nghĩa 1 Queue:
+
+    typedef struct Queue {
+        int* items;
+        int size;
+        int front, rear;
+    } Queue;
+
+
+**Một số thao tác của Queue.**
+
+***Khởi tạo 1 Queue*** 
+
+    void initialize(Queue *queue, int size) 
+    {
+        queue->items = (int*) malloc(sizeof(int)* size);
+        queue->front = -1;
+        queue->rear = -1;
+        queue->size = size;
+    }
+
+***Hàm check trạng thái của Queue***
+
+    int is_empty(Queue queue) {
+        return queue.front == -1;
+    }
+
+    int is_full(Queue queue) {
+        return (queue.rear + 1) % queue.size == queue.front;
+    }
+
+***Hàm thêm phần tử vào Queue***
+
+    void enqueue(Queue *queue, int value) {
+        if (!is_full(*queue)) {
+            if (is_empty(*queue)) {
+                queue->front = queue->rear = 0;
+            } else {
+                queue->rear = (queue->rear + 1) % queue->size;
+            }
+            queue->items[queue->rear] = value;
+        } else {
+            printf("Queue overflow\n");
+        }
+    }
+
+***Hàm lấy phần tử ra ngoài Queue***
+
+    int dequeue(Queue *queue) {
+        if (!is_empty(*queue)) {
+            int dequeued_value = queue->items[queue->front];
+            if (queue->front == queue->rear) {
+                queue->front = queue->rear = -1;
+            } else {
+                queue->front = (queue->front + 1) % queue->size;
+            }
+            return dequeued_value;
+        } else {
+            printf("Queue underflow\n");
+            return -1;
+        }
+    }
+
+***Hàm lấy giá trị đầu Queue***
+
+    int front(Queue queue) {
+        if (!is_empty(queue)) {
+            return queue.items[queue.front];
+        } else {
+            printf("Queue is empty\n");
+            return -1;
+        }
+    }
+
+
+
+
+
+
+
 
 
 
